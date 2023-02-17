@@ -1,7 +1,12 @@
 from django.urls import path
 from . import views
 from . import cron
-
+from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 urlpatterns = [
     path('', views.apiOverview, name="api-overview"),
     # path('task-list/', views.apiList, name="api-list"),
@@ -19,6 +24,12 @@ urlpatterns = [
     # path('task-delete/<int:id>', views.apiDelete, name="api-Delete"),
     # path('task-delete/<int:id>', views.ApiDeleteView.as_view(), name="api-Delete"),
     path('task-delete/<int:id>', views.ApiDeleteGenericView.as_view(), name="api-Delete"),
+    path('register/', views.ApiRegisterView.as_view(), name="register"),
+    path('login/', views.LoginApiView.as_view(), name="login"),
+    path('signin/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('signin/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('signin/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    # path('custom/', views.CustomTokenObtainPairView.as_view(), name='custom'),
     path('test/', cron.send_smd_whatsapp, name="test"),
     
 ]

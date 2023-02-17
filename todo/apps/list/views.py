@@ -1,9 +1,14 @@
 from django.shortcuts import render
 # from rest_framework.decorators import api_view
 from rest_framework import views, status, generics, exceptions, decorators, response
+from rest_framework_simplejwt.views import TokenViewBase, TokenObtainPairView
 # from rest_framework.response import Response
 from . import serializers
 from . import models
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.conf import settings
+from datetime import datetime, timezone
 
 
 # Create your views here.
@@ -126,44 +131,8 @@ class APiUpdateView(views.APIView):
 
 class ApiUpdateGenericView(generics.RetrieveUpdateAPIView):
     queryset = models.TodoList.objects.all()
-    serializer_class = serializers.ReadTodoListSerializer
-#     # lookup_field = 'id'
+    serializer_class = serializers.TodoListSerializer
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-
-        if instance.completed:
-            # If `completed` field is True, only allow updates to non-`completed` fields
-            if 'completed' in request.data and request.data['completed']:
-                serializer = serializers.TodoListSerializer(instance, data=request.data, partial=True)
-        else:
-            serializer = self.get_serializer(instance, data=request.data, partial=True)
-
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return response.Response(serializer.data)
-    # def update(self, request, *args, **kwargs):
-    #     print("11111")
-    #     partial = kwargs.pop('partial', False)
-    #     instance = self.get_object()
-    #     serializer = self.get_serializer(instance, data=request.data, partial=partial)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_update(serializer)
-
-    #     if getattr(instance, '_prefetched_objects_cache', None):
-    #         # If 'prefetch_related' has been applied to a queryset, we need to
-    #         # forcibly invalidate the prefetch cache on the instance.
-    #         instance._prefetched_objects_cache = {}
-
-    #     return response.Response(serializer.data)
-
-    # def perform_update(self, serializer):
-    #     serializer.save()
-
-    # def partial_update(self, request, *args, **kwargs):
-    #     kwargs['partial'] = True
-    #     return self.update(request, *args, **kwargs)
     
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #DELETE
@@ -190,3 +159,31 @@ class ApiDeleteView(views.APIView):
 class ApiDeleteGenericView(generics.RetrieveDestroyAPIView):
     serializer_class = serializers.TodoListSerializer
     queryset = models.TodoList.objects.all()
+
+class ApiRegisterView(generics.CreateAPIView):
+    serializer_class = serializers.RegisterSerializer
+    permission_classes = (AllowAny,)
+
+# class CustomTokenObtainPairView(TokenObtainPairView):
+#     serializer_class = serializers.LoginSerializer
+    
+#     def post(self, request, *args, **kwargs):
+#         response = super().post(request, *args, **kwargs)
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+        
+#         user = serializer.validated_data['user']
+#         refresh = RefreshToken.for_user(user)
+#         access_token = str(refresh.access_token)
+#         refresh_token = str(refresh)
+
+#         # Set access token as HttpOnly cookie
+#         response.set_cookie(key='access_token', value=access_token, httponly=True, secure=settings.SESSION_COOKIE_SECURE, expires=datetime.now(tz=timezone.utc) + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'])
+
+#         # Set refresh token as regular cookie
+#         response.set_cookie(key='refresh_token', value=refresh_token, secure=settings.SESSION_COOKIE_SECURE, expires=datetime.now(tz=timezone.utc) + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'])
+
+#         return response  
+
+class LoginApiView(TokenViewBase):
+    serializer_class = serializers.LoginSerializer
