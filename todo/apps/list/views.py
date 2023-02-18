@@ -185,5 +185,41 @@ class ApiRegisterView(generics.CreateAPIView):
 
 #         return response  
 
-class LoginApiView(TokenViewBase):
+class LoginApiView(TokenObtainPairView):
     serializer_class = serializers.LoginSerializer
+
+class LoginApiView(TokenObtainPairView):
+    serializer_class = serializers.LoginSerializer
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            # Set the JWT token as a cookie on the response
+            access_token_cookie_key = settings.SIMPLE_JWT.get('AUTH_COOKIE', 'access_token')
+            response.set_cookie(
+                key=access_token_cookie_key, 
+                value=response.data['access'],
+                expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+            )
+            refresh_token_cookie_key = settings.SIMPLE_JWT.get('AUTH_COOKIE', 'refresh_token')
+            # response.set_cookie(
+            #     key=refresh_token_cookie_key, 
+            #     value=response.data['refresh'],
+            #     expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+            #     secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            #     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+            #     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+            # )
+            # refresh_token = response.data['refresh']
+            # response.set_cookie(
+            #     key=settings.SIMPLE_JWT['AUTH_COOKIE'], 
+            #     value=refresh_token,
+            #     expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+            #     secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            #     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+            #     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+            # )
+        return response    
