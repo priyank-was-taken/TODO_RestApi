@@ -204,22 +204,5 @@ class LoginApiView(TokenObtainPairView):
                 httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                 samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
             )
-            refresh_token_cookie_key = settings.SIMPLE_JWT.get('AUTH_COOKIE', 'refresh_token')
-            # response.set_cookie(
-            #     key=refresh_token_cookie_key, 
-            #     value=response.data['refresh'],
-            #     expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-            #     secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-            #     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-            #     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
-            # )
-            # refresh_token = response.data['refresh']
-            # response.set_cookie(
-            #     key=settings.SIMPLE_JWT['AUTH_COOKIE'], 
-            #     value=refresh_token,
-            #     expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-            #     secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-            #     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-            #     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
-            # )
+            
         return response    
