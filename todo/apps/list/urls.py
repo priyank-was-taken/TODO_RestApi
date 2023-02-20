@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from . import cron
 from rest_framework.routers import DefaultRouter
@@ -7,7 +7,10 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+router = DefaultRouter()
+# router.register('otp', views.OtpView, basename='otp')
 urlpatterns = [
+    path('', include(router.urls)),
     path('', views.apiOverview, name="api-overview"),
     # path('task-list/', views.apiList, name="api-list"),
     # path('task-list/', views.ApiListView.as_view(), name="api-list"),
@@ -30,6 +33,7 @@ urlpatterns = [
     path('signin/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('signin/verify/', TokenVerifyView.as_view(), name='token_verify'),
     # path('custom/', views.CustomTokenObtainPairView.as_view(), name='custom'),
+    # path('otp/', views.OtpView.as_view(), name="otp"),    
     path('test/', cron.send_smd_whatsapp, name="test"),
     
 ]

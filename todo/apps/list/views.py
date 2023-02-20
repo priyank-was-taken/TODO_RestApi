@@ -9,7 +9,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from datetime import datetime, timezone
+import pyotp
+from django.http import request, HttpResponse
+import random
+from rest_framework import viewsets
 
+def generate_otp(user):
+    OTP = random.randint(1000, 9999)
+    print(OTP.now())
+    return HttpResponse("HEY")
 
 # Create your views here.
 @decorators.api_view(['GET'])
@@ -164,6 +172,12 @@ class ApiRegisterView(generics.CreateAPIView):
     serializer_class = serializers.RegisterSerializer
     permission_classes = (AllowAny,)
 
+# class OtpView(viewsets.ModelViewSet):
+#     queryset = models.User.objects.all()
+#     serializer_class = serializers.UserVerificationSerializer
+#     model = models.User
+#     permission_classes = (AllowAny,)
+
 # class CustomTokenObtainPairView(TokenObtainPairView):
 #     serializer_class = serializers.LoginSerializer
     
@@ -185,8 +199,8 @@ class ApiRegisterView(generics.CreateAPIView):
 
 #         return response  
 
-class LoginApiView(TokenObtainPairView):
-    serializer_class = serializers.LoginSerializer
+# class LoginApiView(TokenObtainPairView):
+#     serializer_class = serializers.LoginSerializer
 
 class LoginApiView(TokenObtainPairView):
     serializer_class = serializers.LoginSerializer
@@ -205,4 +219,4 @@ class LoginApiView(TokenObtainPairView):
                 samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
             )
             
-        return response    
+        return response

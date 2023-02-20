@@ -152,6 +152,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
+    
 }
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
@@ -168,3 +169,11 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SAMESITE': 'Lax',  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
 
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST_USER = 'harshitj@consolebit.com'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_PASSWORD = "zjhncacmlnnykasb"
+EMAIL_REGEX = True

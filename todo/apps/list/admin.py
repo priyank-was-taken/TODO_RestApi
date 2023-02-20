@@ -10,12 +10,13 @@ class TodoListAdmin(admin.ModelAdmin):
 
 @admin.register(models.User)
 class CustomUserAdmin(UserAdmin):
-    list_display = ("email",'created', 'updated')
+    list_display = ("email",'created', 'updated', "is_verified")
     ordering = ("email",)
 
     fieldsets = (
-        (None, {'fields': ('email', 'password','first_name', 'last_name')}),
+        (None, {'fields': ('email', 'password','first_name', 'last_name', 'phone_number')}),
     )
+    exclude = ('is_verified',)
     add_fieldsets = (
         (None, {
             'classes': ('wide',),

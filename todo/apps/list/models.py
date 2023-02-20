@@ -1,6 +1,7 @@
 from django.db import models
 from django_extensions.db.models import TimeStampedModel
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin, Group
+from django.core.validators import RegexValidator
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, is_active=True, is_staff = False, is_admin = False):
@@ -40,6 +41,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=50, unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=40)
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True, unique=True) # Validators should be a list
+    is_verified = models.BooleanField(default=False, editable=False)
     active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
