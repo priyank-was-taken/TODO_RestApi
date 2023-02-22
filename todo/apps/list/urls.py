@@ -35,5 +35,6 @@ urlpatterns = [
     # path('custom/', views.CustomTokenObtainPairView.as_view(), name='custom'),
     # path('otp/', views.OtpView.as_view(), name="otp"),    
     path('test/', cron.send_smd_whatsapp, name="test"),
+    path('verify/', views.UserVerifyView.as_view(), name="verify"),
     
 ]

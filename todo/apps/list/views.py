@@ -12,12 +12,14 @@ from datetime import datetime, timezone
 import pyotp
 from django.http import request, HttpResponse
 import random
+import base64
 from rest_framework import viewsets
+from django.core.mail import send_mail
 
 def generate_otp(user):
-    OTP = random.randint(1000, 9999)
-    print(OTP.now())
-    return HttpResponse("HEY")
+    secret = base64.b32encode(user.encode())
+    OTP = pyotp.TOTP(secret, interval=1000)
+    return {'secret': secret, 'OTP': OTP.now()}
 
 # Create your views here.
 @decorators.api_view(['GET'])
@@ -171,6 +173,118 @@ class ApiDeleteGenericView(generics.RetrieveDestroyAPIView):
 class ApiRegisterView(generics.CreateAPIView):
     serializer_class = serializers.RegisterSerializer
     permission_classes = (AllowAny,)
+
+class UserVerifyView(generics.GenericAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.UserVerifySerializer
+
+    def post(self, request):
+        key = request.data.get('secret_key')
+        secret = base64.b32decode(key)
+        email = secret.decode()
+        print(email)
+        try:
+            user = models.User.objects.get(email=email)
+            print(user)
+        except models.User.DoesNotExist:
+            return response.Response('user is not exists')
+
+        otp = generate_otp(email)
+
+        if request.data.get('otp') == otp.get('OTP'):
+            print(user.is_verified)
+            user.is_verified = True
+            print(user.is_verified)
+            user.save()
+            # refresh = TokenObtainPairSerializer.get_token(user)
+
+            data = {
+                # 'refresh': str(refresh),
+                # 'access': str(refresh.access_token),
+                'user': serializers.UserSerializer(user).data,
+            }
+            return response.Response(data)
+        else:
+            return response.Response('Wrong OTP')
+# class RegisterApi(views.APIView):
+
+#     def post(self, request):
+#             data = request.data
+#             serializer = serializers.RegisterSerializer(data=data)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 (serializer.data['email'])
+#                 return Response({
+#                     'status': 200,
+#                     'message': 'registration successfully check mail',
+#                     'data': serializer.data,
+#                 })
+
+#             return Response({
+#                 'status': 400,
+#                 'message': 'something went wrong',
+#                 'data': serializer.errors,
+#             })
+            
+# class RegisterApi(APIView):
+
+#     def post(self, request):
+#             data = request.data
+#             serializer = UserSerializer(data=data)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 send_otp_via_mail(serializer.data['email'])
+#                 return Response({
+#                     'status': 200,
+#                     'message': 'registration successfully check mail',
+#                     'data': serializer.data,
+#                 })
+
+#             return Response({
+#                 'status': 400,
+#                 'message': 'something went wrong',
+#                 'data': serializer.errors,
+#             })
+
+
+# class VerifyOTP(APIView):
+#     def post(self, request):
+#         data = request.data
+#         serializer = VerifyAccountSerializer(data = data)
+
+#         if serializer.is_valid():
+#             email = serializer.data['email']
+#             otp = serializer.data['otp']
+
+#             user = User.objects.filter(email = email)
+#             if not user.exists():
+#                 return Response({
+#                     'status': 400,
+#                     'message': 'something went wrong',
+#                     'data': 'invalid email',
+#                 })
+
+#             if user[0].otp != otp:
+#                 return Response({
+#                     'status': 400,
+#                     'message': 'something went wrong',
+#                     'data': 'invalid otp',
+#                 })
+#             user = user.first()
+#             user.is_verified = True
+#             user.save()
+
+#             return Response({
+#                 'status': 200,
+#                 'message': 'account verified',
+#                 'data': {},
+#             })
+
+#         return Response({
+#             'status': 400,
+#             'message': 'something went wrong',
+#             'data': serializer.errors,
+#         })
 
 # class OtpView(viewsets.ModelViewSet):
 #     queryset = models.User.objects.all()

@@ -15,7 +15,7 @@ def generate_otp(user):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
-        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'is_verfied']
+        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'is_verified']
 
 class LoginSerializer(TokenObtainPairSerializer):
     class Meta:
@@ -30,26 +30,17 @@ class LoginSerializer(TokenObtainPairSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password], style={"input_type": "password"})
     password2 = serializers.CharField(write_only=True, required=True, style={"input_type": "password"})
-
+    is_verified = serializers.BooleanField(read_only=True)
     class Meta:
         model = models.User
-        fields = ["id", "first_name", "last_name", "email", "password", "password2", 'phone_number']
+        fields = ["id", "first_name", "last_name", "email", "password", "password2", 'phone_number', 'is_verified']
         # extra_kwargs = {}
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError({"password": "password fields didn't match."})
-        key =  generate_otp(attrs['email'])  
-        key1 = key['OTP']    
-        send_mail(
-                    'OTP Verification',
-                    f"your otp is {key1}",
-                    settings.EMAIL_HOST_USER,
-                    ['priyank.sharma@consolebit.com'],
-                    fail_silently=False,
-        )         
-        attrs['secret'] = key['secret']
-        return attrs    
+        
+        return attrs
 
 
     def create(self, validated_data):
@@ -58,8 +49,30 @@ class RegisterSerializer(serializers.ModelSerializer):
         
         user.set_password(validated_data['password'])
         # user.is_active = True
+        key =  generate_otp(user.email)  
+        key1 = key['OTP']    
+        send_mail(
+                    'OTP Verification',
+                    f"your otp is {key1}",
+                    settings.EMAIL_HOST_USER,
+                    ['priyank.sharma@consolebit.com'],
+                    fail_silently=False,
+        )         
+        secret = key['secret']
+        print("hey")
+        print(secret)
         user.save()
-        return user    
+        return user
+class UserVerifySerializer(serializers.ModelSerializer):
+    secret_key = serializers.CharField(max_length=255)
+    otp = serializers.IntegerField()
+
+    class Meta:
+        model = models.User
+        fields = ['secret_key', 'otp']      
+
+# class RegenerateOtpVerification(serializers.ModelSerializer):
+#     email = serializers.EmailField()
 
 # class UserVerificationSerializer(serializers.ModelSerializer):
 #     email = serializers.CharField(max_length=225)
